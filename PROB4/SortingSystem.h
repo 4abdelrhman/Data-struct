@@ -4,7 +4,6 @@
 #include<algorithm>
 #include <chrono>
 #include<fstream>
-#include<string>
 using namespace std;
 template <typename T>
 class SortingSystem {
@@ -48,7 +47,7 @@ SortingSystem<T>::SortingSystem(int n) {
     data = new T[size];
 
     file.ignore();
-    
+
     cout <<"Reading " << size << " data from the file...\n";
     for (int i = 0; i < size; i++) {
         file >> data[i];
@@ -333,9 +332,6 @@ void SortingSystem<T>::countSort() {
 }
 
 
-
-
-
 // Radix Sort
 template <typename T>
 void SortingSystem<T>::radixSort() {
@@ -385,7 +381,7 @@ void SortingSystem<T>::radixSort() {
 
 
 
-//Bucket Sort
+// //Bucket Sort
 template<typename T>
 void SortingSystem<T>::bucketSort() {
     if (size <= 0) return;
@@ -473,52 +469,61 @@ void SortingSystem<T>::showMenu() {
         if (choice >= 1 && choice <= 9) {
             // Restore original data before sorting
             copy(oriData, oriData + size, data);
-            
-            cout << endl;
-            // Display original data
-            cout << "Initial Data: [";
-            for (size_t i = 0; i < size; i++) {
-                cout << oriData[i];
-                if (i < size - 1) cout << ", ";
-            }
-            cout << "]\n";
         }
 
         switch (choice) {
             case 1:
-                cout << "Sorting using Insertion Sort...\n";
+                cout << "\nSorting using Insertion Sort...\n";
+                displayData();
+                cout << endl;
                 measureSortTime(&SortingSystem<T>::insertionSort);
                 break;
             case 2:
-                cout<<"Sorting using Selection Sort...\n";
+                cout<<"\nSorting using Selection Sort...\n";
+                displayData();
+                cout << endl;
                 measureSortTime(&SortingSystem<T>::selectionSort);
                 break;
             case 3:
-                cout << "Sorting using Bubble Sort...\n";
+                cout << "\nSorting using Bubble Sort...\n";
+                displayData();
+                cout << endl;
                 measureSortTime(&SortingSystem<T>::bubbleSort);
                 break;
             case 4:
-                cout << "Sorting using Shell Sort...\n";
+                cout << "\nSorting using Shell Sort...\n";
+                displayData();
+                cout << endl;
                 measureSortTime(&SortingSystem<T>::shellSort);
                 break;
             case 5:
-                cout << "Sorting using Merge Sort...\n";
+                cout << "\nSorting using Merge Sort...\n";
+                displayData();
+                cout << endl;
                 measureSortTime(&SortingSystem<T>::mergeSort);
                 break;
             case 6:
-                cout << "Sorting using Quick Sort...\n";
+                cout << "\nSorting using Quick Sort...\n";
+                displayData();
+                cout << endl;
                 measureSortTime(&SortingSystem<T>::quickSort);
                 break;
             case 7:
-                cout << "Sorting using Count Sort...\n";
+                cout << "\nSorting using Count Sort...\n";
+                displayData();
+                cout << endl;
                 measureSortTime(&SortingSystem<T>::countSort);
                 break;
             case 8:
-                cout << "Sorting using Radix Sort...\n";
+                cout << "\nSorting using Radix Sort...\n";
+                displayData();
+                cout << endl;
                 measureSortTime(&SortingSystem<T>::radixSort);
                 break;
             case 9:
-                cout << "Sorting using Bucket Sort...\n";
+                cout << "\nSorting using Bucket Sort...\n";
+                displayData();
+                cout << endl;
                 measureSortTime(&SortingSystem<T>::bucketSort);
                 break;
             default:
@@ -528,8 +533,7 @@ void SortingSystem<T>::showMenu() {
         cout << "Do you want to use another sorting algorith? (y/n): ";
         cin >> repeat;
     } while (repeat == 'y' || repeat == 'Y');
+    cout << "Thanks for using the Sorting System! Goodbye!";
     cout << "Exiting..." << endl;
 }
-
-
 #endif
