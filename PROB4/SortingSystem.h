@@ -42,12 +42,9 @@ SortingSystem<T>::SortingSystem(int n) {
         cout << "Error, Couldn't open the file.\n";
        exit(1);
     }
-
     size = n;
     data = new T[size];
-
     file.ignore();
-
     cout <<"Reading " << size << " data from the file...\n";
     for (int i = 0; i < size; i++) {
         file >> data[i];
@@ -274,9 +271,10 @@ int SortingSystem<T>::partition(int low, int high) {
 }
 
 //Count Sort
-template <typename T>
-void SortingSystem<T>::countSort() {
-    static_assert(is_same<T, int>::value, "Count sort only supports integers!");
+template<>
+void SortingSystem<int>::countSort() {
+    static_assert(std::is_same<int, int>::value, "Count sort only supports int.");
+
     if (size == 0) return;
 
     // Find the maximum and minimum values in the array
@@ -285,7 +283,7 @@ void SortingSystem<T>::countSort() {
 
     // Create a count array to store the count of each unique element
     int range = maxVal - minVal + 1;
-    int* count = new int[range](); // Initialize all elements to 0
+    int* count = new int[range]();
 
     // Store the count of each element in the count array
     for (int i = 0; i < size; i++) {
@@ -333,9 +331,9 @@ void SortingSystem<T>::countSort() {
 
 
 // Radix Sort
-template <typename T>
-void SortingSystem<T>::radixSort() {
-    static_assert(is_same<T, int>::value, "Radix Sort only supports integers!");
+template<>
+void SortingSystem<int>::radixSort() {
+    static_assert(std::is_same<int, int>::value, "Radix sort only supports int.");
 
     // Find the maximum absolute value to determine the number of digits
     int maxVal = abs(data[0]);
@@ -380,12 +378,10 @@ void SortingSystem<T>::radixSort() {
 
 
 
-
-// //Bucket Sort
+//Bucket Sort
 template<typename T>
 void SortingSystem<T>::bucketSort() {
     if (size <= 0) return;
-
 
     // Step 1: Find the minimum and maximum values in the data
     T minVal = data[0], maxVal = data[0];
@@ -397,37 +393,46 @@ void SortingSystem<T>::bucketSort() {
     int bucketCount = size;
     T** buckets = new T*[bucketCount];
     int* bucketSizes = new int[bucketCount]();
+    int* bucketCapacities = new int[bucketCount]();
 
     // Step 3: Distribute elements into buckets
     for (int i = 0; i < size; i++) {
-        int index = (bucketCount * (data[i] - minVal)) / (maxVal - minVal + 1);
-        bucketSizes[index]++;
-    }
+        int index;
+        
+        if constexpr (is_arithmetic<T>::value) {
+            index = static_cast<int>((bucketCount * (data[i] - minVal)) / (maxVal - minVal + 1));
+        } else if constexpr (is_same<T, string>::value) {
+            if (data[i].empty()) {
+                index = 0;
+            } else {
+                char firstChar = data[i][0];
+                index = static_cast<int>((bucketCount * (firstChar - 'a')) / ('z' - 'a' + 1));
+            }
+        }
 
-    // Allocate memory for each bucket
-    for (int i = 0; i < bucketCount; i++) {
-        buckets[i] = new T[bucketSizes[i]];
-        bucketSizes[i] = 0;
-    }
-
-    // Place elements into buckets
-    for (int i = 0; i < size; i++) {
-        int index = (bucketCount * (data[i] - minVal)) / (maxVal - minVal + 1);
+        if (bucketSizes[index] == bucketCapacities[index]) {
+            bucketCapacities[index] = bucketCapacities[index] == 0 ? 1 : bucketCapacities[index] * 2;
+            T* newBucket = new T[bucketCapacities[index]];
+            if (bucketSizes[index] > 0) {
+                copy(buckets[index], buckets[index] + bucketSizes[index], newBucket);
+                delete[] buckets[index];
+            }
+            buckets[index] = newBucket;
+        }
         buckets[index][bucketSizes[index]++] = data[i];
+
+        
     }
 
     // Step 4: Sort each bucket individually
-    for (int i = 0; i < bucketCount; i++) {
-        sort(buckets[i], buckets[i] + bucketSizes[i]);
-    }
-
     int index = 0;
     for (int i = 0; i < bucketCount; i++) {
-        for (int j = 0; j < bucketSizes[i]; j++) {
+        sort(buckets[i], buckets[i] + bucketSizes[i]);
+        for(int j = 0; j < bucketSizes[i];j++){
             data[index++] = buckets[i][j];
+            cout << "Inserted Element " << data[i] << ": ";
+            displayData();
         }
-        cout << "Processed Bucket " << i + 1 << ": ";
-        displayData();
     }
 
     // Clean up
@@ -436,8 +441,8 @@ void SortingSystem<T>::bucketSort() {
     }
     delete[] buckets;
     delete[] bucketSizes;
+    delete[] bucketCapacities;
 
-    // Step 6: Display the sorted data
     cout << "Sorted Data: ";
     displayData();
 }
@@ -474,55 +479,65 @@ void SortingSystem<T>::showMenu() {
         switch (choice) {
             case 1:
                 cout << "\nSorting using Insertion Sort...\n";
-                displayData();
+                cout <<"Initial data: "; displayData();
                 cout << endl;
                 measureSortTime(&SortingSystem<T>::insertionSort);
                 break;
             case 2:
                 cout<<"\nSorting using Selection Sort...\n";
-                displayData();
+                cout <<"Initial data: "; displayData();
                 cout << endl;
                 measureSortTime(&SortingSystem<T>::selectionSort);
                 break;
             case 3:
                 cout << "\nSorting using Bubble Sort...\n";
-                displayData();
+                cout <<"Initial data: "; displayData();
                 cout << endl;
                 measureSortTime(&SortingSystem<T>::bubbleSort);
                 break;
             case 4:
                 cout << "\nSorting using Shell Sort...\n";
-                displayData();
+                cout <<"Initial data: "; displayData();
                 cout << endl;
                 measureSortTime(&SortingSystem<T>::shellSort);
                 break;
             case 5:
                 cout << "\nSorting using Merge Sort...\n";
-                displayData();
+                cout <<"Initial data: "; displayData();
                 cout << endl;
                 measureSortTime(&SortingSystem<T>::mergeSort);
                 break;
             case 6:
                 cout << "\nSorting using Quick Sort...\n";
-                displayData();
+                cout <<"Initial data: "; displayData();
                 cout << endl;
                 measureSortTime(&SortingSystem<T>::quickSort);
                 break;
             case 7:
-                cout << "\nSorting using Count Sort...\n";
-                displayData();
-                cout << endl;
-                measureSortTime(&SortingSystem<T>::countSort);
-                break;
+                if constexpr (is_same<T, int>::value){
+                    cout << "\nSorting using Count Sort...\n";
+                    cout <<"Initial data: "; displayData();
+                    cout << endl;
+                    measureSortTime(&SortingSystem<T>::countSort);
+                    break;
+                }else{
+                    cout <<"Count sort only support INTEGERS!";
+                    break;
+                }
             case 8:
-                cout << "\nSorting using Radix Sort...\n";
-                displayData();
-                cout << endl;
-                measureSortTime(&SortingSystem<T>::radixSort);
-                break;
+                if constexpr (is_same<T, int>::value){
+                    cout << "\nSorting using Radix Sort...\n";
+                    cout <<"Initial data: "; displayData();
+                    cout << endl;
+                    measureSortTime(&SortingSystem<T>::radixSort);
+                    break;
+                }else{
+                    cout <<"Radix sort only support INTEGERS!";
+                    break;
+                }
             case 9:
                 cout << "\nSorting using Bucket Sort...\n";
-                displayData();
+                cout <<"Initial data: "; displayData();
                 cout << endl;
                 measureSortTime(&SortingSystem<T>::bucketSort);
                 break;
@@ -533,7 +548,9 @@ void SortingSystem<T>::showMenu() {
         cout << "Do you want to use another sorting algorith? (y/n): ";
         cin >> repeat;
     } while (repeat == 'y' || repeat == 'Y');
-    cout << "Thanks for using the Sorting System! Goodbye!";
+    cout << "Thanks for using the Sorting System! Goodbye!\n";
     cout << "Exiting..." << endl;
 }
+
+
 #endif
