@@ -37,20 +37,42 @@ public:
 //Implementation
 template <typename T>
 SortingSystem<T>::SortingSystem(int n) {
-    ifstream file("test.txt");
-    if(!file){
+    ifstream fileINT("fileINT.txt");
+    ifstream fileDouble("fileDouble.txt");
+    ifstream fileString("fileString.txt");
+
+    if(!fileINT || !fileDouble || !fileString){
         cout << "Error, Couldn't open the file.\n";
-       exit(1);
+        exit(1);
     }
     size = n;
     data = new T[size];
-    file.ignore();
-    cout <<"Reading " << size << " data from the file...\n";
-    for (int i = 0; i < size; i++) {
-        file >> data[i];
+    if constexpr (is_same<T, int>::value){
+        fileINT.ignore();
+        cout <<"Reading " << size << " data from the file...\n";
+        for (int i = 0; i < size; i++) {
+            fileINT >> data[i];
+        }
+        cout << "Data entered: ";
+        displayData();
+    }else if constexpr(is_same<T, double>::value){
+        fileDouble.ignore();
+        cout <<"Reading " << size << " data from the file...\n";
+        for (int i = 0; i < size; i++) {
+            fileDouble >> data[i];
+        }
+        cout << "Data entered: ";
+        displayData();
+    }else if constexpr(is_same<T, string>::value){
+        fileString.ignore();
+        cout <<"Reading " << size << " data from the file...\n";
+        for (int i = 0; i < size; i++) {
+            fileString >> data[i];
+        }
+        cout << "Data entered: ";
+        displayData();
     }
-    cout << "Data entered: ";
-    displayData();
+
 }
 
 template<typename T>
@@ -110,7 +132,6 @@ void SortingSystem<T>::measureSortTime(void (SortingSystem::*sortFunc)(int, int)
 template<typename T>
 void SortingSystem<T>::insertionSort() {
     
-
     for (int i = 1; i < size; i++) {
         T key = data[i];
         int j = i - 1;
@@ -119,11 +140,9 @@ void SortingSystem<T>::insertionSort() {
             j--;
         }
         data[j + 1] = key;
-
         cout << "Iteration " << i << ": ";
         displayData();
     }
-
     cout << "Sorted Data: ";
     displayData();
 }
@@ -132,7 +151,6 @@ void SortingSystem<T>::insertionSort() {
 template<typename T>
 void SortingSystem<T>::selectionSort() {
     
-
     for (int i = 0; i < size - 1; i++) {
         int minIdx = i;
         for (int j = i + 1; j < size; j++) {
@@ -141,11 +159,9 @@ void SortingSystem<T>::selectionSort() {
             }
         }
         swap(data[i], data[minIdx]);
-
         cout << "Iteration " << i + 1 << ": ";
         displayData();
     }
-
     cout << "Sorted Data: ";
     displayData();
 }
@@ -153,8 +169,6 @@ void SortingSystem<T>::selectionSort() {
 // Bubble Sort
 template<typename T>
 void SortingSystem<T>::bubbleSort() {
-    
-
     for (int i = 0; i < size - 1; i++) {
         for (int j = 0; j < size - i - 1; j++) {
             if (data[j] > data[j + 1]) {
@@ -207,18 +221,15 @@ void SortingSystem<T>::mergeSort(int left, int right) {
 }
 
 
-//Merg Sort Helper function
+//Merge Sort Helper function
 template<typename T>
 void SortingSystem<T>::merge(int left, int mid, int right) {
     int leftSize = mid - left + 1;
     int rightSize = right - mid;
-
     T* leftArr = new T[leftSize];
     T* rightArr = new T[rightSize];
-
     for (int i = 0; i < leftSize; i++) leftArr[i] = data[left + i];
     for (int j = 0; j < rightSize; j++) rightArr[j] = data[mid + 1 + j];
-
     int i = 0, j = 0, k = left;
     while (i < leftSize && j < rightSize) {
         if (leftArr[i] <= rightArr[j]) {
@@ -230,6 +241,9 @@ void SortingSystem<T>::merge(int left, int mid, int right) {
     while (i < leftSize) data[k++] = leftArr[i++];
     while (j < rightSize) data[k++] = rightArr[j++];
 }
+
+
+
 
 // Quick Sort
 template<typename T>
@@ -273,7 +287,6 @@ int SortingSystem<T>::partition(int low, int high) {
 //Count Sort
 template<>
 void SortingSystem<int>::countSort() {
-    static_assert(std::is_same<int, int>::value, "Count sort only supports int.");
 
     if (size == 0) return;
 
@@ -333,8 +346,6 @@ void SortingSystem<int>::countSort() {
 // Radix Sort
 template<>
 void SortingSystem<int>::radixSort() {
-    static_assert(std::is_same<int, int>::value, "Radix sort only supports int.");
-
     // Find the maximum absolute value to determine the number of digits
     int maxVal = abs(data[0]);
     for (int i = 1; i < size; i++) {
@@ -342,33 +353,27 @@ void SortingSystem<int>::radixSort() {
             maxVal = abs(data[i]);
         }
     }
-
     for (int exp = 1; maxVal / exp > 0; exp *= 10) {
         int output[size] = {0};
         int count[10] = {0};
-
         // Count occurrences of each digit at the current place value (exp)
         for (int i = 0; i < size; i++) {
             int digit = (abs(data[i]) / exp) % 10;
             count[digit]++;
         }
-
         // Modify count array to store cumulative counts
         for (int i = 1; i < 10; i++) {
             count[i] += count[i - 1];
         }
-
         // Build the output array by placing elements in their correct position
         for (int i = size - 1; i >= 0; i--) {
             int digit = (abs(data[i]) / exp) % 10;
             output[count[digit] - 1] = data[i];
             count[digit]--;
         }
-
         for (int i = 0; i < size; i++) {
             data[i] = output[i];
         }
-
         cout << "sorting by digit " << exp << ": ";
         displayData();
     }
@@ -383,33 +388,29 @@ template<typename T>
 void SortingSystem<T>::bucketSort() {
     if (size <= 0) return;
 
-    // Step 1: Find the minimum and maximum values in the data
     T minVal = data[0], maxVal = data[0];
     for (int i = 1; i < size; i++) {
         if (data[i] < minVal) minVal = data[i];
         if (data[i] > maxVal) maxVal = data[i];
     }
-
+    //Initialize the bucket
+    //bucketCount is the number of buckets
+    //buckets is the array of buckets
+    //bucketSizes is the array of sizes of each bucket
+    //bucketCapacities is the array of capacities of each bucket
     int bucketCount = size;
     T** buckets = new T*[bucketCount];
     int* bucketSizes = new int[bucketCount]();
     int* bucketCapacities = new int[bucketCount]();
 
-    // Step 3: Distribute elements into buckets
     for (int i = 0; i < size; i++) {
         int index;
         
         if constexpr (is_arithmetic<T>::value) {
             index = static_cast<int>((bucketCount * (data[i] - minVal)) / (maxVal - minVal + 1));
-        } else if constexpr (is_same<T, string>::value) {
-            if (data[i].empty()) {
-                index = 0;
-            } else {
-                char firstChar = data[i][0];
-                index = static_cast<int>((bucketCount * (firstChar - 'a')) / ('z' - 'a' + 1));
-            }
         }
-
+        //Resize the bucket if it's full
+        //copy existing elements to a new bucket
         if (bucketSizes[index] == bucketCapacities[index]) {
             bucketCapacities[index] = bucketCapacities[index] == 0 ? 1 : bucketCapacities[index] * 2;
             T* newBucket = new T[bucketCapacities[index]];
@@ -420,22 +421,21 @@ void SortingSystem<T>::bucketSort() {
             buckets[index] = newBucket;
         }
         buckets[index][bucketSizes[index]++] = data[i];
-
-        
     }
 
-    // Step 4: Sort each bucket individually
     int index = 0;
     for (int i = 0; i < bucketCount; i++) {
         sort(buckets[i], buckets[i] + bucketSizes[i]);
         for(int j = 0; j < bucketSizes[i];j++){
             data[index++] = buckets[i][j];
-            cout << "Inserted Element " << data[i] << ": ";
+            cout << "Inserted Element " << data[index-1] << ": ";
             displayData();
         }
     }
+    cout << "Sorted Data: ";
+    displayData();
 
-    // Clean up
+    
     for (int i = 0; i < bucketCount; i++) {
         delete[] buckets[i];
     }
@@ -443,8 +443,6 @@ void SortingSystem<T>::bucketSort() {
     delete[] bucketSizes;
     delete[] bucketCapacities;
 
-    cout << "Sorted Data: ";
-    displayData();
 }
 
 
@@ -536,16 +534,21 @@ void SortingSystem<T>::showMenu() {
                     break;
                 }
             case 9:
-                cout << "\nSorting using Bucket Sort...\n";
-                cout <<"Initial data: "; displayData();
-                cout << endl;
-                measureSortTime(&SortingSystem<T>::bucketSort);
-                break;
+                if constexpr (is_same<T, int>::value || is_same<T,double>::value){
+                    cout << "\nSorting using Bucket Sort...\n";
+                    cout <<"Initial data: "; displayData();
+                    cout << endl;
+                    measureSortTime(&SortingSystem<T>::bucketSort);
+                    break;
+                }else{
+                    cout <<"Bucket sort only support INTEGERS or DOUBLE!";
+                    break;
+                }
             default:
                 cout << "Invalid choice! Try again.\n";
         }
         cout << endl;
-        cout << "Do you want to use another sorting algorith? (y/n): ";
+        cout << "Do you want to use another sorting algorithm? (y/n): ";
         cin >> repeat;
     } while (repeat == 'y' || repeat == 'Y');
     cout << "Thanks for using the Sorting System! Goodbye!\n";
