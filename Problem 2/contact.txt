@@ -1,0 +1,20 @@
+150
+John Doe
+012-345-6789
+john.doe@example.com
+210
+Peter Jones
+011-123-7890
+peter.jones@example.org
+310
+Omar Hassan
+010-876-5432
+omar.hassan@example.com
+420
+Sara Ahmed
+015-999-1122
+sara.ahmed@example.net
+505
+Lina Youssef
+010-334-5566
+lina.youssef@example.org
